@@ -1,11 +1,14 @@
 "use client";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
     <div>
-      <nav>
-        <ul className="fixed flex justify-center items-center gap-10 right-0 pr-20 pt-5 text-white text-xl z-999">
-          <li>Home</li>
+      <nav className="flex justify-end items-center fixed right-0 top-0 pr-20 h-20 bg-black w-full z-999">
+        <ul className="flex justify-center items-center gap-10 text-white text-xl">
+          <Link href={"/"}>
+            <li>Home</li>
+          </Link>
           <li>Movies</li>
           <li>Tickets</li>
           <li>Login</li>

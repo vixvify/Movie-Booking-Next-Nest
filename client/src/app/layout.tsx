@@ -17,10 +17,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className={kanit.className}>
-      <body>
+    <html lang="th" className={`${kanit.className}`}>
+      <body className="pt-20 flex min-h-screen flex-col">
         <Navbar />
-        {children}
+        <main className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>
