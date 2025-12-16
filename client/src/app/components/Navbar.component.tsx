@@ -13,6 +13,9 @@ export default function Navbar() {
           <li>Tickets</li>
           <li>Login</li>
           <li>Signup</li>
+          <Link href={"/pages/admin"}>
+            <li>Admin</li>
+          </Link>
         </ul>
       </nav>
     </div>
