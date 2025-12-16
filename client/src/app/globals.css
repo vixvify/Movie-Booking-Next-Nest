@@ -4,3 +4,7 @@ body {
   font-family: var(--font-kanit);
   background-color: #0d0d0d;
 }
+
+button {
+  cursor: pointer;
+}
