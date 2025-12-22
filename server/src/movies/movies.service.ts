@@ -62,4 +62,13 @@ export class MoviesService {
       throw err;
     }
   }
+
+  async getmovie_single(id: string) {
+    try {
+      const movies = await this.prisma.movies.findUnique({ where: { id } });
+      return { status: 200, movies };
+    } catch (err) {
+      throw err;
+    }
+  }
 }
