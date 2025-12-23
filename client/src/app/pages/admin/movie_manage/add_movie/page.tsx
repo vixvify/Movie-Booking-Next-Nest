@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Addmovie } from "../../../../../../types/addmovie";
 
 export default function page() {
@@ -15,10 +15,11 @@ export default function page() {
   const [file, setFile] = useState<File | null>(null);
 
   const inputValue = (field: string) => {
-    return (e: any) => setData({ ...data, [field]: e.target.value });
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setData({ ...data, [field]: e.target.value });
   };
 
-  const addMovie = async (e: any) => {
+  const addMovie = async (e: React.FormEvent<HTMLElement>) => {
     e.preventDefault();
     try {
       const form = new FormData();
@@ -43,27 +44,27 @@ export default function page() {
             type="text"
             placeholder="Enter Movie Name"
             className="border border-white w-[400px] h-10 text-white p-3"
-            onInput={inputValue("name")}
+            onChange={inputValue("name")}
           ></input>
           <p className="text-white">Description</p>
           <textarea
             placeholder="Enter Description"
             className="border border-white w-[400px] h-[70px] text-white p-3"
-            onInput={inputValue("description")}
+            onChange={inputValue("description")}
           ></textarea>
           <p className="text-white">Duration (Minutes)</p>
           <input
             type="number"
             placeholder="Enter Movie Duration"
             className="border border-white w-[400px] h-10 text-white p-3"
-            onInput={inputValue("duration")}
+            onChange={inputValue("duration")}
           ></input>
           <p className="text-white">Release Date</p>
           <input
             type="date"
             placeholder="Enter Movie Release Date"
             className="border border-white w-[400px] h-10 text-white p-3"
-            onInput={inputValue("release")}
+            onChange={inputValue("release")}
           ></input>
           <p className="text-white">Poster</p>
           <input

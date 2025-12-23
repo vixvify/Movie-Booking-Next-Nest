@@ -7,12 +7,12 @@ import axios from "axios";
 import { Movies } from "../../../../../types/movies";
 
 export default function page() {
-  const [seats, setseats] = useState(new Array(200).fill(false));
+  const [seats, setseats] = useState<boolean[]>(new Array(200).fill(false));
   const [data, setData] = useState<Movies>();
-  const [count_normal, setCount_normal] = useState(0);
-  const [count_premium, setCount_premium] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [imgLoading, setImgLoading] = useState(true);
+  const [count_normal, setCount_normal] = useState<number>(0);
+  const [count_premium, setCount_premium] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [imgLoading, setImgLoading] = useState<boolean>(true);
   const { id } = useParams();
 
   const getData = async () => {
