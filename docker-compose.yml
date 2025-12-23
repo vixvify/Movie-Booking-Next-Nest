@@ -1,6 +1,7 @@
 services:
   server:
     build: ./server
+    image: vixvify/movie-server
     container_name: movie-server
     restart: always
     env_file:
@@ -10,6 +11,7 @@ services:
 
   client:
     build: ./client
+    image: vixvify/movie-client
     container_name: movie-client
     restart: always
     env_file:
