@@ -1,6 +1,23 @@
 "use client";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import Swal from "sweetalert2";
+
+const confirmLogout = async () => {
+  Swal.fire({
+    title: "Are you sure?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, Logout!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      signOut();
+    }
+  });
+};
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -23,7 +40,11 @@ export default function Navbar() {
               <li>Sign up</li>
             </Link>
           )}
-          {session?.user && <li>Logout</li>}
+          {session?.user && (
+            <li className="cursor-pointer" onClick={confirmLogout}>
+              Logout
+            </li>
+          )}
           {session?.user.isAdmin && (
             <Link href={"/pages/admin"}>
               <li>Admin</li>

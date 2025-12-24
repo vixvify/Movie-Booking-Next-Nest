@@ -36,7 +36,7 @@ export default function page() {
     } else {
       Toast.fire({
         icon: "error",
-        title: res?.error || "Login failed",
+        title: "Login failed",
       });
     }
   };
