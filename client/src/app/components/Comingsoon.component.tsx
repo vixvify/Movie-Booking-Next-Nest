@@ -54,7 +54,7 @@ export default function Coming() {
           <h1 className="font-bold text-white text-5xl">Coming Soon</h1>
           <div className="gap-10 mt-10">
             <Carousel>
-              <CarouselContent className="flex justify-center items-center">
+              <CarouselContent className="flex items-center">
                 {data.map((e, index) => (
                   <CarouselItem key={index} className="basis-1/5">
                     <Image
@@ -62,6 +62,7 @@ export default function Coming() {
                       width={300}
                       height={450}
                       alt="poster"
+                      className="rounded-md"
                     ></Image>
                     <h1 className="text-white mt-5 text-xl font-bold">
                       {e.name}

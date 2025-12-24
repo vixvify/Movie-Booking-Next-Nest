@@ -55,7 +55,7 @@ export default function Movie() {
           <h1 className="font-bold text-white text-5xl">Now Showing</h1>
           <div className="gap-10 mt-10">
             <Carousel>
-              <CarouselContent className="flex justify-center items-center">
+              <CarouselContent className="flex items-center">
                 {data.map((e, index) => (
                   <CarouselItem key={index} className="basis-1/5">
                     <Link href={`/pages/booking/${e.id}`}>
@@ -64,6 +64,7 @@ export default function Movie() {
                         width={300}
                         height={450}
                         alt="poster"
+                        className="rounded-md"
                       ></Image>
                     </Link>
                     <h1 className="text-white mt-5 text-xl font-bold">

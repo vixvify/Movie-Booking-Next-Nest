@@ -11,8 +11,12 @@ export default function Navbar() {
           </Link>
           <li>Movies</li>
           <li>Tickets</li>
-          <li>Login</li>
-          <li>Signup</li>
+          <Link href={"/pages/login"}>
+            <li>Login</li>
+          </Link>
+          <Link href={"/pages/signup"}>
+            <li>Sign up</li>
+          </Link>
           <Link href={"/pages/admin"}>
             <li>Admin</li>
           </Link>
