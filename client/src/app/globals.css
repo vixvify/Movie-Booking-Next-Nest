@@ -5,7 +5,12 @@
 
 body {
   font-family: var(--font-kanit);
-  background-color: #0d0d0d;
+  background: radial-gradient(
+    circle at top,
+    #1a2238 0%,
+    #0b0f1a 45%,
+    #05070c 100%
+  );
 }
 
 button {

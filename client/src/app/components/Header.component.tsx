@@ -12,7 +12,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
 
 export default function Header() {
-  const header = ["/avatarheader.png", "/superheader.png", "/spiderheader.png"];
+  const header = ["/avatarheader.png", "/spiderheader.png"];
   const autoplay = useRef(
     Autoplay({
       delay: 3000,
@@ -23,6 +23,9 @@ export default function Header() {
     <div className="flex justify-center items-center w-full">
       <Carousel
         className="w-[80%] mx-auto relative"
+        opts={{
+          loop: true,
+        }}
         plugins={[autoplay.current]}
       >
         <CarouselContent>
