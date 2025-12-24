@@ -8,8 +8,10 @@ export default function Home() {
   return (
     <div className="pb-20">
       <Header />
-      <Movie />
-      <Comingsoon />
+      <div className="mt-10 flex flex-col justify-center items-center gap-10">
+        <Movie />
+        <Comingsoon />
+      </div>
     </div>
   );
 }

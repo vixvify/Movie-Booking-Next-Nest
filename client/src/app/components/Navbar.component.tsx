@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Navbar() {
   return (
     <div>
-      <nav className="flex justify-end items-center fixed right-0 top-0 pr-20 h-20 bg-black w-full z-999">
+      <nav className="flex justify-end items-center fixed right-0 top-0 pr-50 h-20 w-full z-999">
         <ul className="flex justify-center items-center gap-10 text-white text-xl">
           <Link href={"/"}>
             <li>Home</li>

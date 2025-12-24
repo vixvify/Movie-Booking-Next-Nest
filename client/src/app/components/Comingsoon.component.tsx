@@ -1,19 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useAnimation } from "framer-motion";
 import { useState, useEffect } from "react";
-import { GrLinkNext } from "react-icons/gr";
-import { GrLinkPrevious } from "react-icons/gr";
-import { Movies } from "../../../types/movies";
 import axios from "axios";
+import { Movies } from "../../../types/movies";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
-export default function Comingsoon() {
+export default function Coming() {
   const [data, setData] = useState<Movies[]>([]);
-  const [start, setStart] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const controls = useAnimation();
-  const WIDTH = 300 + 40;
 
   const getData = async () => {
     const res = await axios.get(
@@ -21,26 +22,6 @@ export default function Comingsoon() {
     );
     setData(res.data.movies);
     setIsLoading(false);
-  };
-
-  const getImages = () => {
-    const result = [];
-    for (let i = 0; i < 6; i++) {
-      result.push(data[(start + i) % data.length]);
-    }
-    return result;
-  };
-
-  const slideNext = async () => {
-    await controls.start({ x: -WIDTH, transition: { duration: 0.35 } });
-    setStart((s) => (s + 1) % data.length);
-    controls.set({ x: 0 });
-  };
-
-  const slidePrev = async () => {
-    controls.set({ x: -WIDTH });
-    setStart((s) => (s - 1 + data.length) % data.length);
-    await controls.start({ x: 0, transition: { duration: 0.35 } });
   };
 
   const formatDateMovie = (date?: string | Date | null) => {
@@ -68,42 +49,32 @@ export default function Comingsoon() {
     );
   } else {
     return (
-      <div className="flex justify-center items-center ml-auto mr-auto mt-10">
-        <div className="flex flex-col justify-center items-start">
+      <div className="flex justify-center items-center ml-auto mr-auto">
+        <div className="flex flex-col justify-center items-start w-[80%]">
           <h1 className="font-bold text-white text-5xl">Coming Soon</h1>
-          <div className="flex justify-center items-center gap-10 mt-10">
-            <GrLinkPrevious
-              className="w-10 h-10 text-white cursor-pointer"
-              onClick={slidePrev}
-            />
-            <div className="overflow-hidden w-[80vw] h-[500px]">
-              <motion.div animate={controls} className="flex gap-10">
-                {getImages().map((e, i) => (
-                  <div
-                    key={i}
-                    className="w-[300px] shrink-0 flex flex-col items-start gap-2"
-                  >
+          <div className="gap-10 mt-10">
+            <Carousel>
+              <CarouselContent className="flex justify-center items-center">
+                {data.map((e, index) => (
+                  <CarouselItem key={index} className="basis-1/5">
                     <Image
-                      src={e?.imgUrl}
+                      src={e.imgUrl}
                       width={300}
-                      height={400}
+                      height={450}
                       alt="poster"
-                      className="rounded-lg"
-                    />
-                    <h1 className="text-white text-center text-xl font-bold mt-3">
-                      {e?.name}
+                    ></Image>
+                    <h1 className="text-white mt-5 text-xl font-bold">
+                      {e.name}
                     </h1>
-                    <h3 className="text-white text-center text-sm font-bold ">
-                      {formatDateMovie(e?.release)}
-                    </h3>
-                  </div>
+                    <h1 className="text-white mt-1 text-md font-bold">
+                      {formatDateMovie(e.release)}
+                    </h1>
+                  </CarouselItem>
                 ))}
-              </motion.div>
-            </div>
-            <GrLinkNext
-              className="w-10 h-10 text-white cursor-pointer"
-              onClick={slideNext}
-            />
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </div>
       </div>
