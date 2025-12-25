@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
@@ -33,6 +34,7 @@
     "cloudinary": "^1.41.3",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "omise": "^1.1.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.19.0",

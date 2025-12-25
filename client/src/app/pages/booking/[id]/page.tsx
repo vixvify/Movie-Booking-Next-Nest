@@ -5,15 +5,32 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import { Movies } from "../../../../../types/movies";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Booking } from "../../../../../types/booking";
+
+type QRResponse = {
+  chargeId: string;
+  qrImage: string;
+  expiresAt: string;
+};
 
 export default function page() {
   const [seats, setseats] = useState<boolean[]>(new Array(200).fill(false));
+  const [seatsNo, setSeatsNo] = useState<string>("");
   const [data, setData] = useState<Movies>();
   const [count_normal, setCount_normal] = useState<number>(0);
   const [count_premium, setCount_premium] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [imgLoading, setImgLoading] = useState<boolean>(true);
   const { id } = useParams();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [openModal, setOpenModal] = useState(false);
+  const [openQr, setOpenQr] = useState(false);
+  const [qrCode, setQr] = useState<QRResponse | null>(null);
+  const [showtime, setShowtime] = useState("");
+  const [now, setNow] = useState(Date.now());
 
   const getData = async () => {
     const res = await axios.get(
@@ -23,9 +40,56 @@ export default function page() {
     setIsLoading(false);
   };
 
+  const getQrcode = async () => {
+    try {
+      const data: Booking = {
+        amount: (count_normal * 200 + count_premium * 230) * 100,
+        seats: seatsNo,
+        showtime: showtime,
+        userId: session?.user.id as string,
+        movieId: id as string,
+      };
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API}/payment/promptpay`,
+        data
+      );
+      setQr(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getRemainingTime = (expiresAt: string, now: number) => {
+    const diff = new Date(expiresAt).getTime() - now;
+
+    if (diff <= 0) return "หมดอายุแล้ว";
+
+    const minutes = Math.floor(diff / 1000 / 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status === "unauthenticated") {
+      router.push("/pages/login");
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (!qrCode?.expiresAt) return;
+
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [qrCode?.expiresAt]);
 
   if (isLoading) {
     return (
@@ -64,13 +128,31 @@ export default function page() {
 
                 <div className="flex justify-between">
                   <span className="text-white/70">Showtime</span>
-                  <select>
-                    <option className="text-black">10.00</option>
-                    <option className="text-black">12.00</option>
-                    <option className="text-black">14.00</option>
-                    <option className="text-black">16.00</option>
-                    <option className="text-black">18.00</option>
-                    <option className="text-black">20.00</option>
+                  <select
+                    onChange={(e) => setShowtime(e.target.value)}
+                    className="text-right"
+                  >
+                    <option className="text-black" hidden value={""}>
+                      Select Showtime
+                    </option>
+                    <option className="text-black" value={"10.00"}>
+                      10.00
+                    </option>
+                    <option className="text-black" value={"12.00"}>
+                      12.00
+                    </option>
+                    <option className="text-black" value={"14.00"}>
+                      14.00
+                    </option>
+                    <option className="text-black" value={"16.00"}>
+                      16.00
+                    </option>
+                    <option className="text-black" value={"18.00"}>
+                      18.00
+                    </option>
+                    <option className="text-black" value={"20.00"}>
+                      20.00
+                    </option>
                   </select>
                 </div>
 
@@ -78,6 +160,13 @@ export default function page() {
                   <span className="text-white/70">Total Seats</span>
                   <span className="font-medium">
                     {count_normal + count_premium}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-white/70">Seats Number</span>
+                  <span className="font-medium w-[40%] flex justify-end">
+                    {seatsNo}
                   </span>
                 </div>
 
@@ -123,17 +212,23 @@ export default function page() {
                         const updated = [...seats];
                         updated[index] = !updated[index];
                         setseats(updated);
-                        if (index < 100) {
-                          const total = updated.filter(
-                            (e, i) => i < 100 && e == true
-                          );
-                          setCount_normal(total.length);
-                        } else {
-                          const total = updated.filter(
-                            (e, i) => i >= 100 && e == true
-                          );
-                          setCount_premium(total.length);
-                        }
+
+                        const seatno = updated.reduce((acc, e, i) => {
+                          if (e) acc.push(i);
+                          return acc;
+                        }, [] as number[]);
+
+                        setSeatsNo(seatno.join(", "));
+
+                        const normal = updated.filter(
+                          (e, i) => i < 100 && e
+                        ).length;
+                        const premium = updated.filter(
+                          (e, i) => i >= 100 && e
+                        ).length;
+
+                        setCount_normal(normal);
+                        setCount_premium(premium);
                       }}
                     />
                   </div>
@@ -151,12 +246,123 @@ export default function page() {
                 <h1 className="text-white mt-3">Premium Seat</h1>
                 <h1 className="text-white"> 230 baht</h1>
               </div>
-              <button className="bg-yellow-600 text-black font-bold p-5 pl-10 pr-10 rounded-xl text-xl ml-20">
+              <button
+                className="bg-yellow-600 text-black font-bold p-5 pl-10 pr-10 rounded-xl text-xl ml-20 hover:bg-yellow-400 disabled:opacity-20"
+                onClick={() => setOpenModal(true)}
+                disabled={count_normal + count_premium === 0 || showtime === ""}
+              >
                 Checkout
               </button>
             </div>
           </div>
         </div>
+        {openModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setOpenModal(false)}
+            />
+            <div className="relative z-10 w-[400px] rounded-2xl bg-zinc-900 p-6 text-white shadow-2xl">
+              <h2 className="text-xl font-bold mb-4 text-center">
+                Confirm Payment
+              </h2>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Movie</span>
+                  <span>{data?.name}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Seats</span>
+                  <span>{seatsNo}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Total</span>
+                  <span className="text-green-400 font-bold">
+                    {count_normal * 200 + count_premium * 230} บาท
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setOpenModal(false)}
+                  className="flex-1 rounded-xl border border-white/30 py-2 hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="flex-1 rounded-xl bg-yellow-500 py-2 font-bold text-black hover:bg-yellow-400"
+                  onClick={() => {
+                    setOpenModal(false);
+                    setOpenQr(true);
+                    getQrcode();
+                  }}
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {openQr && !qrCode && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 rounded-2xl">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+              <p className="text-sm text-white/80">Processing</p>
+            </div>
+          </div>
+        )}
+
+        {openQr && qrCode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/70" />
+            <div className="relative z-10 w-[400px] rounded-2xl bg-zinc-900 p-6 text-white shadow-2xl">
+              <h2 className="text-xl font-bold mb-4 text-center">Payment</h2>
+
+              <div className="space-y-3 text-sm">
+                <img
+                  src={qrCode.qrImage}
+                  width={400}
+                  height={400}
+                  alt="qr"
+                ></img>
+                {qrCode && (
+                  <h1 className="text-white">
+                    Qr code จะหมดอายุใน{" "}
+                    {getRemainingTime(qrCode.expiresAt, now)}
+                  </h1>
+                )}
+
+                <div className="flex justify-between">
+                  <span>Total</span>
+                  <span className="text-green-400 font-bold">
+                    {count_normal * 200 + count_premium * 230} บาท
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setOpenQr(false)}
+                  className="flex-1 rounded-xl border border-white/30 py-2 hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="flex-1 rounded-xl bg-yellow-500 py-2 font-bold text-black hover:bg-yellow-400"
+                  onClick={() => setOpenQr(false)}
+                >
+                  Pay
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

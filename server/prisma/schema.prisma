@@ -20,8 +20,18 @@ model User {
 model Orders {
   id        String      @id @default(uuid())
   createdAt DateTime    @default(now())
+  amount Int
+  seats String
+  showtime String
+
   userId String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  chargeId String @unique
+  status String
+
+  movieId String
+  movie   Movies @relation(fields: [movieId], references: [id])
 }
 
 model Movies {
@@ -31,4 +41,5 @@ model Movies {
   duration Int
   release DateTime 
   imgUrl String
+  orders      Orders[]
 }
