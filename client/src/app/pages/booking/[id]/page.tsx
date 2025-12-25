@@ -83,7 +83,7 @@ export default function page() {
     const showtimeDate = new Date();
     showtimeDate.setHours(hour, minute, 0, 0);
 
-    return showtimeDate.getTime() <= Date.now();
+    return showtimeDate.getTime() <= now;
   };
 
   const getRemainingTime = (expiresAt: string, now: number) => {

@@ -14,18 +14,15 @@ export const authOptions: NextAuthOptions = {
           email: string;
           password: string;
         };
-        // const apiUrl =
-        //   typeof window === "undefined"
-        //     ? process.env.SERVER_API
-        //     : process.env.NEXT_PUBLIC_API;
+        const apiUrl =
+          typeof window === "undefined"
+            ? process.env.SERVER_API
+            : process.env.NEXT_PUBLIC_API;
         try {
-          const user = await axios.post(
-            `${process.env.NEXT_PUBLIC_API}/user/login`,
-            {
-              email,
-              password,
-            }
-          );
+          const user = await axios.post(`${apiUrl}/user/login`, {
+            email,
+            password,
+          });
           const foundUser = user.data.user;
           return {
             id: foundUser.id,
