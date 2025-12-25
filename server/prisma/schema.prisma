@@ -32,6 +32,8 @@ model Orders {
 
   movieId String
   movie   Movies @relation(fields: [movieId], references: [id])
+
+  expiresAt DateTime
 }
 
 model Movies {

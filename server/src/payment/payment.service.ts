@@ -34,18 +34,21 @@ export class PaymentService {
     if (!source?.scannable_code?.image?.download_uri) {
       throw new Error('PromptPay QR not available');
     }
-    await this.prisma.orders.create({
-      data: {
-        ...data,
-        chargeId: charge.id,
-        status: 'PENDING',
-      },
-    });
+
     const EXPIRE_MINUTES = 5;
 
     const expiresAt = new Date(
       Date.now() + EXPIRE_MINUTES * 60 * 1000,
     ).toISOString();
+
+    await this.prisma.orders.create({
+      data: {
+        ...data,
+        chargeId: charge.id,
+        status: 'PENDING',
+        expiresAt,
+      },
+    });
 
     return {
       chargeId: charge.id,
@@ -60,6 +63,12 @@ export class PaymentService {
     });
   }
   async cancelOrder(chargeId: string) {
+    const order = await this.prisma.orders.findUnique({
+      where: { chargeId },
+    });
+
+    if (!order) return;
+    if (order.status === 'PAID') return;
     await this.prisma.orders.update({
       where: { chargeId },
       data: { status: 'CANCELLED' },

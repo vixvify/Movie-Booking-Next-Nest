@@ -19,7 +19,11 @@ export class PaymentController {
       await this.paymentService.markPaid(charge.id);
     }
 
-    if (event.type == 'charge.failed' || event.type == 'charge.expired') {
+    if (
+      event.type == 'charge.failed' ||
+      event.type == 'charge.expired' ||
+      event.type == 'charge.cancelled'
+    ) {
       const charge = event.data;
       await this.paymentService.cancelOrder(charge.id);
     }

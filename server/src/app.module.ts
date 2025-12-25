@@ -7,10 +7,20 @@ import { OrdersModule } from './orders/orders.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentModule } from './payment/payment.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { OrderCleanupService } from './order-cleanup/order-cleanup.service';
 
 @Module({
-  imports: [PrismaModule, MoviesModule, OrdersModule, UserModule, AuthModule, PaymentModule],
+  imports: [
+    PrismaModule,
+    MoviesModule,
+    OrdersModule,
+    UserModule,
+    AuthModule,
+    PaymentModule,
+    ScheduleModule.forRoot(),
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, OrderCleanupService],
 })
 export class AppModule {}
