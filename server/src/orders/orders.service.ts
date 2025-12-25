@@ -21,4 +21,12 @@ export class OrdersService {
       throw new InternalServerErrorException('Get orders failed');
     }
   }
+
+  async getStatus(id: string) {
+    const order = await this.prisma.orders.findUnique({
+      where: { id },
+    });
+
+    return { status: order?.status };
+  }
 }

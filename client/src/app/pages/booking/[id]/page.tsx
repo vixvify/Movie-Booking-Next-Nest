@@ -8,8 +8,10 @@ import { Movies } from "../../../../../types/movies";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Booking } from "../../../../../types/booking";
+import Swal from "sweetalert2";
 
 type QRResponse = {
+  orderId: string;
   chargeId: string;
   qrImage: string;
   expiresAt: string;
@@ -121,6 +123,41 @@ export default function page() {
 
     return () => clearInterval(timer);
   }, [qrCode?.expiresAt]);
+
+  useEffect(() => {
+    if (!qrCode) return;
+
+    const timer = setInterval(async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API}/orders/getstatus/${qrCode.orderId}`
+        );
+
+        if (res.data.status === "PAID") {
+          clearInterval(timer);
+          Swal.fire({
+            title: "Payment Completed",
+            icon: "success",
+          });
+          router.push("/");
+        }
+
+        if (res.data.status === "EXPIRED") {
+          clearInterval(timer);
+          Swal.fire({
+            title: "Payment expired",
+            icon: "error",
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [qrCode?.orderId]);
 
   if (isLoading) {
     return (

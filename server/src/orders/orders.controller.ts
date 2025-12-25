@@ -9,4 +9,9 @@ export class OrdersController {
   getOrder(@Param('id') id: string) {
     return this.orderservice.getOrder(id);
   }
+
+  @Get('/getstatus/:id')
+  getStatus(@Param('id') id: string) {
+    return this.orderservice.getStatus(id);
+  }
 }

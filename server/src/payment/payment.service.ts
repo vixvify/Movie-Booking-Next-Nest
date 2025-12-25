@@ -41,7 +41,7 @@ export class PaymentService {
       Date.now() + EXPIRE_MINUTES * 60 * 1000,
     ).toISOString();
 
-    await this.prisma.orders.create({
+    const order = await this.prisma.orders.create({
       data: {
         ...data,
         chargeId: charge.id,
@@ -51,6 +51,7 @@ export class PaymentService {
     });
 
     return {
+      orderId: order.id,
       chargeId: charge.id,
       qrImage: source.scannable_code.image.download_uri,
       expiresAt,
