@@ -16,8 +16,8 @@ type QRResponse = {
 };
 
 export default function page() {
-  const [seats, setseats] = useState<boolean[]>(new Array(200).fill(false));
-  const [seatsNo, setSeatsNo] = useState<string>("");
+  const [seats, setseats] = useState<string[]>(new Array(200).fill("avail"));
+  const [seatsNo, setSeatsNo] = useState<number[]>([]);
   const [data, setData] = useState<Movies>();
   const [count_normal, setCount_normal] = useState<number>(0);
   const [count_premium, setCount_premium] = useState<number>(0);
@@ -31,6 +31,7 @@ export default function page() {
   const [qrCode, setQr] = useState<QRResponse | null>(null);
   const [showtime, setShowtime] = useState("");
   const [now, setNow] = useState(Date.now());
+  const showtimes = ["10:00", "13:00", "16:00", "19:00"];
 
   const getData = async () => {
     const res = await axios.get(
@@ -38,6 +39,23 @@ export default function page() {
     );
     setData(res.data.movies);
     setIsLoading(false);
+  };
+
+  const getMovieSeat = async () => {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API}/orders/getOrder/${id}`
+    );
+    const data = res.data.orders;
+    const bookedSeat = data
+      .filter((e: any) => e.showtime === showtime)
+      .map((e: any) => e.seats);
+    const newArr = [...seats];
+    bookedSeat.map((order: any) => {
+      order.map((e: number) => {
+        newArr[e] = "booked";
+      });
+    });
+    setseats(newArr);
   };
 
   const getQrcode = async () => {
@@ -59,6 +77,15 @@ export default function page() {
     }
   };
 
+  const isPastTime = (time: string) => {
+    const [hour, minute] = time.split(":").map(Number);
+
+    const showtimeDate = new Date();
+    showtimeDate.setHours(hour, minute, 0, 0);
+
+    return showtimeDate.getTime() <= Date.now();
+  };
+
   const getRemainingTime = (expiresAt: string, now: number) => {
     const diff = new Date(expiresAt).getTime() - now;
 
@@ -73,6 +100,10 @@ export default function page() {
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    getMovieSeat();
+  }, [showtime]);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -129,30 +160,23 @@ export default function page() {
                 <div className="flex justify-between">
                   <span className="text-white/70">Showtime</span>
                   <select
+                    value={showtime}
                     onChange={(e) => setShowtime(e.target.value)}
                     className="text-right"
                   >
                     <option className="text-black" hidden value={""}>
                       Select Showtime
                     </option>
-                    <option className="text-black" value={"10.00"}>
-                      10.00
-                    </option>
-                    <option className="text-black" value={"12.00"}>
-                      12.00
-                    </option>
-                    <option className="text-black" value={"14.00"}>
-                      14.00
-                    </option>
-                    <option className="text-black" value={"16.00"}>
-                      16.00
-                    </option>
-                    <option className="text-black" value={"18.00"}>
-                      18.00
-                    </option>
-                    <option className="text-black" value={"20.00"}>
-                      20.00
-                    </option>
+                    {showtimes.map((time) => (
+                      <option
+                        key={time}
+                        value={time}
+                        disabled={isPastTime(time)}
+                        className="text-black disabled:text-gray-600"
+                      >
+                        {time}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -166,7 +190,7 @@ export default function page() {
                 <div className="flex justify-between">
                   <span className="text-white/70">Seats Number</span>
                   <span className="font-medium w-[40%] flex justify-end">
-                    {seatsNo}
+                    {seatsNo.toString()}
                   </span>
                 </div>
 
@@ -201,30 +225,41 @@ export default function page() {
             </div>
             <div className="flex justify-center items-center flex-wrap gap-1 mt-5 w-full ml-auto mr-auto">
               {seats.map((e, index) => {
+                const isBooked = seats[index] === "booked";
+                const canSelect = showtime !== "";
                 return (
                   <div className="" key={index}>
                     <MdEventSeat
                       color={`${
-                        seats[index] ? "yellow" : index < 100 ? "red" : "purple"
+                        isBooked || !canSelect
+                          ? "grey"
+                          : seats[index] === "unavail"
+                          ? "yellow"
+                          : index < 100
+                          ? "red"
+                          : "purple"
                       }`}
                       className="w-6 h-6"
                       onClick={() => {
+                        if (isBooked || !canSelect) return;
                         const updated = [...seats];
-                        updated[index] = !updated[index];
+                        updated[index] === "avail"
+                          ? (updated[index] = "unavail")
+                          : (updated[index] = "avail");
                         setseats(updated);
 
                         const seatno = updated.reduce((acc, e, i) => {
-                          if (e) acc.push(i);
+                          if (e === "unavail") acc.push(i);
                           return acc;
                         }, [] as number[]);
 
-                        setSeatsNo(seatno.join(", "));
+                        setSeatsNo(seatno);
 
                         const normal = updated.filter(
-                          (e, i) => i < 100 && e
+                          (e, i) => i < 100 && e === "unavail"
                         ).length;
                         const premium = updated.filter(
-                          (e, i) => i >= 100 && e
+                          (e, i) => i >= 100 && e === "unavail"
                         ).length;
 
                         setCount_normal(normal);

@@ -21,7 +21,7 @@ model Orders {
   id        String      @id @default(uuid())
   createdAt DateTime    @default(now())
   amount Int
-  seats String
+  seats Int[]
   showtime String
 
   userId String

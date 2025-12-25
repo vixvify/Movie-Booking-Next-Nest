@@ -1,6 +1,6 @@
 export interface Booking {
   amount: number;
-  seats: string;
+  seats: number[];
   showtime: string;
   userId: string;
   movieId: string;

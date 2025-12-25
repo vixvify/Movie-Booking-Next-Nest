@@ -1,13 +1,21 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  IsArray,
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  ArrayNotEmpty,
+  IsInt,
+} from 'class-validator';
 
 export class BookingDTO {
   @IsNumber()
   @IsNotEmpty()
   amount: number;
 
-  @IsString()
-  @IsNotEmpty()
-  seats: string;
+  @IsArray()
+  @IsInt({ each: true })
+  @ArrayNotEmpty()
+  seats: number[];
 
   @IsString()
   @IsNotEmpty()
