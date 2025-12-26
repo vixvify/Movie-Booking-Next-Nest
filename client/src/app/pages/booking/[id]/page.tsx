@@ -45,7 +45,7 @@ export default function page() {
 
   const getMovieSeat = async () => {
     const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API}/orders/getOrder/${id}`
+      `${process.env.NEXT_PUBLIC_API}/orders/getSeatBooked/${id}`
     );
     const data = res.data.orders;
     const bookedSeat = data
@@ -58,6 +58,34 @@ export default function page() {
       });
     });
     setseats(newArr);
+    setSeatsNo([]);
+    setCount_normal(0);
+    setCount_premium(0);
+  };
+
+  const toggleSeat = (index: number, isBooked: boolean, canSelect: boolean) => {
+    if (isBooked || !canSelect) return;
+    const updated = [...seats];
+    updated[index] === "avail"
+      ? (updated[index] = "unavail")
+      : (updated[index] = "avail");
+    setseats(updated);
+
+    const seatno: number[] = [];
+    updated.map((e: string, i: number) => {
+      if (e === "unavail") {
+        seatno.push(i);
+      }
+    });
+    setSeatsNo(seatno);
+
+    const normal = updated.filter((e, i) => i < 100 && e === "unavail").length;
+    const premium = updated.filter(
+      (e, i) => i >= 100 && e === "unavail"
+    ).length;
+
+    setCount_normal(normal);
+    setCount_premium(premium);
   };
 
   const getQrcode = async () => {
@@ -104,6 +132,7 @@ export default function page() {
   }, []);
 
   useEffect(() => {
+    if (!showtime) return;
     getMovieSeat();
   }, [showtime]);
 
@@ -125,7 +154,7 @@ export default function page() {
   }, [qrCode?.expiresAt]);
 
   useEffect(() => {
-    if (!qrCode) return;
+    if (!qrCode || !openQr) return;
 
     const timer = setInterval(async () => {
       try {
@@ -157,7 +186,7 @@ export default function page() {
     return () => {
       clearInterval(timer);
     };
-  }, [qrCode?.orderId]);
+  }, [qrCode?.orderId, openQr]);
 
   if (isLoading) {
     return (
@@ -277,31 +306,7 @@ export default function page() {
                           : "purple"
                       }`}
                       className="w-6 h-6"
-                      onClick={() => {
-                        if (isBooked || !canSelect) return;
-                        const updated = [...seats];
-                        updated[index] === "avail"
-                          ? (updated[index] = "unavail")
-                          : (updated[index] = "avail");
-                        setseats(updated);
-
-                        const seatno = updated.reduce((acc, e, i) => {
-                          if (e === "unavail") acc.push(i);
-                          return acc;
-                        }, [] as number[]);
-
-                        setSeatsNo(seatno);
-
-                        const normal = updated.filter(
-                          (e, i) => i < 100 && e === "unavail"
-                        ).length;
-                        const premium = updated.filter(
-                          (e, i) => i >= 100 && e === "unavail"
-                        ).length;
-
-                        setCount_normal(normal);
-                        setCount_premium(premium);
-                      }}
+                      onClick={() => toggleSeat(index, isBooked, canSelect)}
                     />
                   </div>
                 );

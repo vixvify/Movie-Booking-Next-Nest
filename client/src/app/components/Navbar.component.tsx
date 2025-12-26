@@ -31,7 +31,9 @@ export default function Navbar() {
           <Link href={"/pages/movies/showing"}>
             <li>Movies</li>
           </Link>
-          {session?.user && <li>Tickets</li>}
+          <Link href={"/pages/tickets"}>
+            {session?.user && <li>Tickets</li>}
+          </Link>
           {!session?.user && (
             <Link href={"/pages/login"}>
               <li>Login</li>

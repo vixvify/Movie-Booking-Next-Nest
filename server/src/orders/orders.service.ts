@@ -6,7 +6,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
-  async getOrder(id: string) {
+  async getSeatBooked(id: string) {
     try {
       const orders = await this.prisma.orders.findMany({
         where: {
@@ -18,7 +18,7 @@ export class OrdersService {
       });
       return { status: 200, orders };
     } catch (err) {
-      throw new InternalServerErrorException('Get orders failed');
+      throw new InternalServerErrorException('Get Seat Booked failed');
     }
   }
 
@@ -28,5 +28,23 @@ export class OrdersService {
     });
 
     return { status: order?.status };
+  }
+
+  async getOrder(id: string) {
+    try {
+      const orders = await this.prisma.orders.findMany({
+        where: { userId: id },
+        include: {
+          movie: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      return { status: 200, orders };
+    } catch (err) {
+      throw new InternalServerErrorException('Get orders failed');
+    }
   }
 }
