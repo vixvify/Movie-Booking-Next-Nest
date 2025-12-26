@@ -34,6 +34,9 @@ export class OrdersService {
     try {
       const orders = await this.prisma.orders.findMany({
         where: { userId: id },
+        orderBy: {
+          createdAt: 'desc',
+        },
         include: {
           movie: {
             select: {

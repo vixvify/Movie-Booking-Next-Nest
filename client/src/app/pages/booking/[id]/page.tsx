@@ -154,7 +154,7 @@ export default function page() {
   }, [qrCode?.expiresAt]);
 
   useEffect(() => {
-    if (!qrCode || !openQr) return;
+    if (!qrCode) return;
 
     const timer = setInterval(async () => {
       try {
@@ -186,7 +186,7 @@ export default function page() {
     return () => {
       clearInterval(timer);
     };
-  }, [qrCode?.orderId, openQr]);
+  }, [qrCode?.orderId]);
 
   if (isLoading) {
     return (
